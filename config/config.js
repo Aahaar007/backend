@@ -2,30 +2,27 @@ require('dotenv').config()
 
 const CONFIG = {}
 
-const requiredDefaults = {
-  PORT: 3000,
-  DB_NAME: 'aahaar',
-  NODE_ENV: 'development',
-}
+CONFIG.PORT = process.env.PORT || 3000
+CONFIG.NODE_ENV = process.env.NODE_ENV
+CONFIG.DB_URL = process.env.DB_URL || 'localhost'
+CONFIG.DB_NAME = process.env.DB_NAME || 'aahaar'
+CONFIG.DB_USERNAME = process.env.DB_USERNAME
+CONFIG.DB_PASSWORD = process.env.DB_PASSWORD
 
-const nonRequiredDefaults = {
-  DB_URL: 'localhost',
-  DB_USERNAME: '',
-  DB_PASSWORD: '',
-}
-
-const requiredVars = Object.keys(requiredDefaults)
-
-requiredVars.forEach((val) => {
-  if (!requiredDefaults[val] && !process.env[val])
-    throw new Error(`Fatal Error. ${val} not defined.`)
-  CONFIG[val] = process.env[val] || requiredDefaults[val]
-})
-
-const nonRequiredVars = Object.keys(nonRequiredDefaults)
-
-nonRequiredVars.forEach((val) => {
-  CONFIG[val] = process.env[val] || nonRequiredDefaults[val]
-})
+CONFIG.FIREBASE_ACCOUNT_TYPE =
+  process.env.FIREBASE_ACCOUNT_TYPE || 'service_account'
+CONFIG.FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID
+CONFIG.FIREBASE_PRIVATE_KEY_ID = process.env.FIREBASE_PRIVATE_KEY_ID
+CONFIG.FIREBASE_PRIVATE_KEY = process.env.FIREBASE_PRIVATE_KEY.replace(
+  /\\n/g,
+  '\n'
+)
+CONFIG.FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL
+CONFIG.FIREBASE_CLIENT_ID = process.env.FIREBASE_CLIENT_ID
+CONFIG.FIREBASE_AUTH_URI = process.env.FIREBASE_AUTH_URI
+CONFIG.FIREBASE_TOKEN_URI = process.env.FIREBASE_TOKEN_URI
+CONFIG.FIREBASE_AUTH_PROVIDER_x509_CERT_URL =
+  process.env.FIREBASE_AUTH_PROVIDER_x509_CERT_URL
+CONFIG.FIREBASE_CLIENT_x509_CERT_URL = process.env.FIREBASE_CLIENT_x509_CERT_URL
 
 module.exports = CONFIG
