@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const requestSchema = new mongoose.Schema(
   {
     orderId: mongoose.Schema.Types.ObjectId,
-    userId: mongoose.Schema.Types.ObjectId,
+    uid: String,
     amount: {
       type: Number,
       min: 1,
