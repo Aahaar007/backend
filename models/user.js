@@ -1,65 +1,100 @@
 const mongoose = require('mongoose')
+const Joi = require('joi')
 const _ = require('lodash')
 
-const userSchema = new mongoose.Schema({
-  uid: {
-    type: String,
+const phoneSchmea = new mongoose.Schema(
+  {
+    region: {
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 4,
+    },
+    number: {
+      type: String,
+      required: true,
+      length: 10,
+    },
   },
-  name: {
-    type: String,
-    required: true,
-    minlength: 4,
-    maxlength: 50,
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
-  },
-  phone: {
-    type: Number,
-    required: true,
-    minlength: 9,
-    maxlength: 9,
-  },
-  food: {
-    listed: [
-      {
-        id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'FoodOrder',
-          required: true,
+  { _id: false }
+)
+
+const userSchema = new mongoose.Schema(
+  {
+    _id: String,
+    name: {
+      type: String,
+      required: false,
+      minlength: 4,
+      maxlength: 50,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      unique: true,
+    },
+    phone: {
+      type: phoneSchmea,
+      required: true,
+      unique: true,
+    },
+    food: {
+      listed: [
+        {
+          id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodOrder',
+            required: true,
+          },
         },
-      },
-    ],
-    donated: [
-      {
-        id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'FoodOrder',
-          required: true,
+      ],
+      donated: [
+        {
+          id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodOrder',
+            required: true,
+          },
         },
-      },
-    ],
-    recieved: [
-      {
-        id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'FoodOrder',
-          required: true,
+      ],
+      recieved: [
+        {
+          id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodOrder',
+            required: true,
+          },
         },
-      },
-    ],
+      ],
+      required: false,
+    },
+    address: {
+      type: String,
+      required: false,
+    },
   },
-  address: {
-    type: String,
-    required: true,
-  },
-})
+  { timestamps: true }
+)
 
 const User = mongoose.model('User', userSchema)
 
+const validateCreateUser = (data) => {
+  const schema = Joi.object({
+    email: Joi.string()
+      .email({ tlds: { allow: ['com', 'in', 'net'] } })
+      .required(),
+    phone: Joi.object({
+      region: Joi.string().regex(/^\+\d{1,3}$/),
+      number: Joi.string().regex(/^\d{10}$/),
+    }).required(),
+  })
+  return schema.validate(data)
+}
+
 exports.User = User
+
+exports.validateCreateUser = validateCreateUser
