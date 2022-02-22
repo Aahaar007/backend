@@ -9,4 +9,6 @@ router.patch('/user', auth(), controller.update)
 
 router.get('/user/:uid?', controller.readOne)
 
+router.get('/user/hasProfile', auth(), controller.hasProfile)
+
 module.exports = router

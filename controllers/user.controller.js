@@ -99,8 +99,20 @@ const readOne = async (req, res) => {
   }
 }
 
+const hasProfile = async (req, res) => {
+  const { uid } = req
+  try {
+    const user = await User.findById(uid).lean()
+    const { name, address, dob } = user
+    return res.status(400).send(!!name && !!address && !!dob)
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
 module.exports = {
   add,
   update,
   readOne,
+  hasProfile,
 }
