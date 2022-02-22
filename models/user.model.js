@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const Joi = require('joi')
+const Joi = require('joi').extend(require('@joi/date'))
 const _ = require('lodash')
 
 const phoneSchmea = new mongoose.Schema(
@@ -74,6 +74,8 @@ const userSchema = new mongoose.Schema(
     },
     address: {
       type: String,
+      min: 3,
+      max: 128,
       required: false,
     },
     dob: {
@@ -99,6 +101,43 @@ const validateCreateUser = (data) => {
   return schema.validate(data)
 }
 
+const validateUpdateUser = (data) => {
+  const name = { min: 4, max: 54 }
+  const address = { min: 3, max: 128 }
+  const dateFormat = 'DD/MM/YYYY'
+  const schema = Joi.object({
+    name: Joi.string()
+      .min(name.min)
+      .max(name.max)
+      .messages({
+        'string.base': `name should be a string`,
+        'string.empty': `name cannot be empty`,
+        'string.min': `name should be at-least ${name.min} characters long.`,
+        'string.max': `name should be at-most ${name.max} characters long.`,
+      }),
+    address: Joi.string()
+      .min(address.min)
+      .max(address.max)
+      .messages({
+        'string.base': `address should be a string`,
+        'string.empty': `address cannot be empty`,
+        'string.min': `address should be at-least ${address.min} characters long.`,
+        'string.max': `address should be at-most ${address.max} characters long.`,
+      }),
+    dob: Joi.date()
+      .format(dateFormat)
+      .max(Date.now())
+      .messages({
+        'date.format': `dob should be in the format ${dateFormat}`,
+        'date.max': `dob cannot be greater than today.`,
+      }),
+  }).messages({
+    'object.unknown': 'The only allowed fields are name, address, and dob.',
+  })
+  return schema.validate(data)
+}
+
 exports.User = User
 
 exports.validateCreateUser = validateCreateUser
+exports.validateUpdateUser = validateUpdateUser

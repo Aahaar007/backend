@@ -1,4 +1,8 @@
-const { validateCreateUser, User } = require('../models/user.model')
+const {
+  validateCreateUser,
+  User,
+  validateUpdateUser,
+} = require('../models/user.model')
 
 //pass a single user object.
 //if 'lean()' is not used, pass the _doc field of the user object.
@@ -34,6 +38,46 @@ const add = async (req, res) => {
   }
 }
 
+const update = async (req, res) => {
+  const { uid } = req
+  const { error } = validateUpdateUser(req.body)
+  if (error) return res.status(400).send({ error: error.message })
+  const fields = ['name', 'address', 'dob']
+  const returnFields = [
+    '_id',
+    'name',
+    'email',
+    'phone',
+    'food',
+    'address',
+    'dob',
+  ]
+  try {
+    const updateQuery = {}
+    fields.forEach((field) => {
+      if (req.body[field]) updateQuery[field] = req.body[field]
+    })
+    const user = await User.findOneAndUpdate(
+      { _id: uid },
+      {
+        $set: updateQuery,
+      },
+      {
+        new: true,
+      }
+    )
+      .select(returnFields)
+      .lean()
+    return res.status(200).send({
+      message: 'user information successfully updated.',
+      user: formatUserResponse(user),
+    })
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
 module.exports = {
   add,
+  update,
 }
