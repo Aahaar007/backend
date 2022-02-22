@@ -77,7 +77,30 @@ const update = async (req, res) => {
   }
 }
 
+const readOne = async (req, res) => {
+  const { uid } = req.params
+  const returnFields = [
+    '_id',
+    'name',
+    'email',
+    'phone',
+    'food',
+    'address',
+    'dob',
+  ]
+  if (!uid) return res.status(400).send({ error: 'user uid must be passed' })
+  try {
+    const user = await User.findById(uid).select(returnFields).lean()
+    if (!user)
+      return res.status(404).send({ error: 'invalid uid/user not found.' })
+    return res.status(400).send({ user: formatUserResponse(user) })
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
 module.exports = {
   add,
   update,
+  readOne,
 }

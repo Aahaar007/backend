@@ -7,4 +7,6 @@ router.post('/user', auth(), controller.add)
 
 router.patch('/user', auth(), controller.update)
 
+router.get('/user/:uid?', controller.readOne)
+
 module.exports = router
