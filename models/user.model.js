@@ -76,6 +76,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    dob: {
+      type: Date,
+      required: false,
+    },
   },
   { timestamps: true }
 )
