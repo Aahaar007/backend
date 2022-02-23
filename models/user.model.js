@@ -13,7 +13,8 @@ const phoneSchmea = new mongoose.Schema(
     number: {
       type: String,
       required: true,
-      length: 10,
+      minlength: 6,
+      maxlength: 12,
     },
   },
   { _id: false }
@@ -25,7 +26,7 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: false,
-      minlength: 4,
+      minlength: 1,
       maxlength: 50,
       trim: true,
     },
@@ -95,14 +96,14 @@ const validateCreateUser = (data) => {
       .required(),
     phone: Joi.object({
       region: Joi.string().regex(/^\+\d{1,3}$/),
-      number: Joi.string().regex(/^\d{10}$/),
+      number: Joi.string().regex(/^\d{6,12}$/),
     }).required(),
   })
   return schema.validate(data)
 }
 
 const validateUpdateUser = (data) => {
-  const name = { min: 4, max: 54 }
+  const name = { min: 1, max: 50 }
   const address = { min: 3, max: 128 }
   const dateFormat = 'DD/MM/YYYY'
   const schema = Joi.object({
