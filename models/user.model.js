@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const Joi = require('joi').extend(require('@joi/date'))
 const _ = require('lodash')
 
+const characterEnums = ['M', 'T', 'F']
+
 const phoneSchmea = new mongoose.Schema(
   {
     region: {
@@ -83,6 +85,10 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    gender: {
+      type: String,
+      enum: characterEnums,
+    },
   },
   { timestamps: true }
 )
@@ -132,6 +138,9 @@ const validateUpdateUser = (data) => {
         'date.format': `dob should be in the format ${dateFormat}`,
         'date.max': `dob cannot be greater than today.`,
       }),
+    gender: Joi.string().valid('M', 'T', 'F').messages({
+      'string.invalid': `Only valid values for the gender field are 'M', 'F', and 'T'`,
+    }),
   }).messages({
     'object.unknown': 'The only allowed fields are name, address, and dob.',
   })

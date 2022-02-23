@@ -4,15 +4,6 @@ const {
   validateUpdateUser,
 } = require('../models/user.model')
 
-//pass a single user object.
-//if 'lean()' is not used, pass the _doc field of the user object.
-const formatUserResponse = (user) => {
-  return {
-    ...user,
-    phone: user.phone.region + '-' + user.phone.number,
-  }
-}
-
 const add = async (req, res) => {
   const uid = req.uid
   const { error } = validateCreateUser(req.body)
@@ -31,7 +22,7 @@ const add = async (req, res) => {
     await user.save()
     return res.status(200).send({
       message: 'user created successfully.',
-      user: formatUserResponse(user._doc),
+      user,
     })
   } catch (e) {
     return res.status(500).send({ error: e.message })
@@ -42,7 +33,7 @@ const update = async (req, res) => {
   const { uid } = req
   const { error } = validateUpdateUser(req.body)
   if (error) return res.status(400).send({ error: error.message })
-  const fields = ['name', 'address', 'dob']
+  const fields = ['name', 'address', 'dob', 'gender']
   const returnFields = [
     '_id',
     'name',
@@ -51,6 +42,7 @@ const update = async (req, res) => {
     'food',
     'address',
     'dob',
+    'gender',
   ]
   try {
     const updateQuery = {}
@@ -70,7 +62,7 @@ const update = async (req, res) => {
       .lean()
     return res.status(200).send({
       message: 'user information successfully updated.',
-      user: formatUserResponse(user),
+      user,
     })
   } catch (e) {
     return res.status(500).send({ error: e.message })
@@ -87,13 +79,14 @@ const readOne = async (req, res) => {
     'food',
     'address',
     'dob',
+    'gender',
   ]
   if (!uid) return res.status(400).send({ error: 'user uid must be passed' })
   try {
     const user = await User.findById(uid).select(returnFields).lean()
     if (!user)
       return res.status(404).send({ error: 'invalid uid/user not found.' })
-    return res.status(400).send({ user: formatUserResponse(user) })
+    return res.status(400).send({ user })
   } catch (e) {
     return res.status(500).send({ error: e.message })
   }
