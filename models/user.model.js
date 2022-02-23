@@ -89,6 +89,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: characterEnums,
     },
+    profileURL: {
+      type: String,
+    },
   },
   { timestamps: true }
 )
@@ -141,8 +144,9 @@ const validateUpdateUser = (data) => {
     gender: Joi.string().valid('M', 'T', 'F').messages({
       'string.invalid': `Only valid values for the gender field are 'M', 'F', and 'T'`,
     }),
+    profileURL: Joi.string(),
   }).messages({
-    'object.unknown': 'The only allowed fields are name, address, and dob.',
+    'object.unknown': 'Invalid fields passed.',
   })
   return schema.validate(data)
 }

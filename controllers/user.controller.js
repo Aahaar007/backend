@@ -33,7 +33,7 @@ const update = async (req, res) => {
   const { uid } = req
   const { error } = validateUpdateUser(req.body)
   if (error) return res.status(400).send({ error: error.message })
-  const fields = ['name', 'address', 'dob', 'gender']
+  const fields = ['name', 'address', 'dob', 'gender', 'profileURL']
   const returnFields = [
     '_id',
     'name',
@@ -43,6 +43,7 @@ const update = async (req, res) => {
     'address',
     'dob',
     'gender',
+    'profileURL',
   ]
   try {
     const updateQuery = {}
@@ -80,6 +81,7 @@ const readOne = async (req, res) => {
     'address',
     'dob',
     'gender',
+    'profileURL',
   ]
   if (!uid) return res.status(400).send({ error: 'user uid must be passed' })
   try {
