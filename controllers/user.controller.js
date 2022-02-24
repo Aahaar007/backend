@@ -99,7 +99,7 @@ const hasProfile = async (req, res) => {
   try {
     const user = await User.findById(uid).lean()
     const { name, address, dob } = user
-    return res.status(400).send(!!name && !!address && !!dob)
+    return res.status(200).send(!!name && !!address && !!dob)
   } catch (e) {
     return res.status(500).send({ error: e.message })
   }
