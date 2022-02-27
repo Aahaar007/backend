@@ -90,7 +90,7 @@ const readOne = async (req, res) => {
     const user = await User.findById(uid).select(returnFields).lean()
     if (!user)
       return res.status(404).send({ error: 'invalid uid/user not found.' })
-    return res.status(400).send({ user })
+    return res.status(200).send({ user })
   } catch (e) {
     return res.status(500).send({ error: e.message })
   }
