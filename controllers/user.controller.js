@@ -1,7 +1,9 @@
+const e = require('express')
 const {
   validateCreateUser,
   User,
   validateUpdateUser,
+  validateExisting,
 } = require('../models/user.model')
 
 const add = async (req, res) => {
@@ -105,9 +107,22 @@ const hasProfile = async (req, res) => {
   }
 }
 
+const checkExisting = async (req, res) => {
+  const { error } = validateExisting(req.body)
+  if (error) return res.status(400).send({ error: error.message })
+  const { phone } = req.body
+  try {
+    const user = await User.findOne({ phone }).lean()
+    return res.status(200).send(!!user)
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
 module.exports = {
   add,
   update,
   readOne,
   hasProfile,
+  checkExisting,
 }

@@ -151,7 +151,18 @@ const validateUpdateUser = (data) => {
   return schema.validate(data)
 }
 
+const validateExisting = (data) => {
+  const schema = Joi.object({
+    phone: Joi.object({
+      region: Joi.string().regex(/^\+\d{1,3}$/),
+      number: Joi.string().regex(/^\d{6,12}$/),
+    }).required(),
+  })
+  return schema.validate(data)
+}
+
 exports.User = User
 
 exports.validateCreateUser = validateCreateUser
 exports.validateUpdateUser = validateUpdateUser
+exports.validateExisting = validateExisting

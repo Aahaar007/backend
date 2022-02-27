@@ -7,6 +7,8 @@ router.post('/user', auth(), controller.add)
 
 router.patch('/user', auth(), controller.update)
 
+router.post('/user/checkExisting', controller.checkExisting)
+
 router.get('/user/hasProfile', auth(), controller.hasProfile)
 
 router.get('/user/:uid?', controller.readOne)
