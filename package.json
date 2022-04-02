@@ -6,7 +6,8 @@
   "scripts": {
     "test": "",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "setup-static-folders": "cross-env mkdir public mkdir public/foodListings"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,10 @@
     "moment": "^2.29.1",
     "mongoose": "^6.0.8",
     "morgan": "^1.10.0",
+    "multer": "^1.4.4"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
     "nodemon": "^2.0.15"
   }
 }
