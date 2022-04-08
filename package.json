@@ -25,6 +25,7 @@
   "homepage": "https://github.com/Aahaar007/backend#readme",
   "dependencies": {
     "@joi/date": "^2.1.0",
+    "aws-sdk": "^2.1110.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
@@ -35,7 +36,8 @@
     "moment": "^2.29.1",
     "mongoose": "^6.0.8",
     "morgan": "^1.10.0",
-    "multer": "^1.4.4"
+    "multer": "^1.4.4",
+    "multer-s3": "^2.10.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
