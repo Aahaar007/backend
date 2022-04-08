@@ -21,6 +21,16 @@ const add = async (req, res) => {
   }
 }
 
+const getAllDonations = async (req, res) => {
+  try {
+    const response = await FoodListing.find().sort({ createdAt: -1 })
+    return res.status(200).json(response)
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
 module.exports = {
   add,
+  getAllDonations,
 }

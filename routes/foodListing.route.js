@@ -35,4 +35,6 @@ router.post(
   controller.add
 )
 
+router.get('/foodListing/all', controller.getAllDonations)
+
 module.exports = router
