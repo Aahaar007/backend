@@ -35,11 +35,7 @@ router.post(
   controller.add
 )
 router.post('/foodListing/deactivate/',auth(),controller.deactivate)
-
-<<<<<<< HEAD
 router.get('/foodListing/getOne/:id',controller.getOne)
-=======
 router.get('/foodListing/all', controller.getAllDonations)
 
->>>>>>> ed6691b2f83edf9a05353f8aff7f83c731d4c3d6
 module.exports = router
