@@ -20,6 +20,7 @@ const add = async (req, res) => {
     return res.status(500).send({ error: e.message })
   }
 }
+<<<<<<< HEAD
 const deactivate = async (req,res)=>{
     const {error}= validateDeactivate(req.body)
     if (error) return res.status(400).send({ error: error.message })
@@ -59,4 +60,19 @@ module.exports = {
   add,
   deactivate,
   getOne
+=======
+
+const getAllDonations = async (req, res) => {
+  try {
+    const response = await FoodListing.find().sort({ createdAt: -1 })
+    return res.status(200).json(response)
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
+module.exports = {
+  add,
+  getAllDonations,
+>>>>>>> ed6691b2f83edf9a05353f8aff7f83c731d4c3d6
 }
