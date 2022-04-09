@@ -22,8 +22,15 @@ const add = async (req, res) => {
 }
 
 const getAllDonations = async (req, res) => {
+  const fields = ['isVeg', 'typeOfDonor', 'quantity']
+  const filterQuery = {}
+  fields.forEach((fields) => {
+    if (req.query[fields]) filterQuery[fields] = req.query[fields]
+  })
   try {
-    const response = await FoodListing.find().sort({ createdAt: -1 })
+    const response = await FoodListing.find(filterQuery).limit(10).sort({
+      createdAt: -1,
+    })
     return res.status(200).json(response)
   } catch (e) {
     return res.status(500).send({ error: e.message })
