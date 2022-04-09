@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 const Joi = require('joi')
+const { boolean } = require('joi')
+Joi.objectId = require('joi-objectid')(Joi)
 
 const foodListingSchema = new mongoose.Schema(
   {
@@ -40,6 +42,10 @@ const foodListingSchema = new mongoose.Schema(
       type: [mongoose.Schema.Types.ObjectId],
       ref: 'Request',
     },
+    isActive:{
+      type: Boolean,
+      default: true
+    }
   },
   { timestamps: true }
 )
@@ -57,5 +63,14 @@ const validateCreate = (data) => {
   })
   return schema.validate(data)
 }
+const validateId = (data) => {
+  const schema = Joi.object({
+    id: Joi.objectId().required(),
+  })
+  return schema.validate(data)
+}
+
 exports.FoodListing = FoodListing
 exports.validateCreate = validateCreate
+exports.validateId = validateId
+
