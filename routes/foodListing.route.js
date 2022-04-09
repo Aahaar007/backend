@@ -46,8 +46,10 @@ router.post(
   upload.fields([{ name: 'refImage', maxCount: 10 }]),
   controller.add
 )
-router.post('/foodListing/deactivate/',auth(),controller.deactivate)
-router.get('/foodListing/getOne/:id',controller.getOne)
-router.get('/foodListing/all', controller.getAllDonations)
+router.get('/foodListing/:id', auth(), controller.readOne)
+
+router.get('/foodListing', auth(), controller.read)
+
+router.delete('/foodListing/deactivate', auth(), controller.deactivate)
 
 module.exports = router

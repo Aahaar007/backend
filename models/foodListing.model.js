@@ -42,10 +42,10 @@ const foodListingSchema = new mongoose.Schema(
       type: [mongoose.Schema.Types.ObjectId],
       ref: 'Request',
     },
-    isActive:{
+    isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   { timestamps: true }
 )
@@ -73,4 +73,3 @@ const validateId = (data) => {
 exports.FoodListing = FoodListing
 exports.validateCreate = validateCreate
 exports.validateId = validateId
-
