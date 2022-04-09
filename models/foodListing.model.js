@@ -63,6 +63,7 @@ const validateCreate = (data) => {
   })
   return schema.validate(data)
 }
+
 const validateId = (data) => {
   const schema = Joi.object({
     id: Joi.objectId().required(),
@@ -70,6 +71,19 @@ const validateId = (data) => {
   return schema.validate(data)
 }
 
+const validateUpdate = (data) => {
+  const schema = Joi.object({
+    quantity: Joi.number(),
+    description: Joi.string(),
+    typeOfDonor: Joi.string().valid('NGO', 'Individual'),
+    isVeg: Joi.boolean(),
+    address: Joi.string(),
+    timeOfExpiry: Joi.string(),
+  })
+  return schema.validate(data)
+}
+
 exports.FoodListing = FoodListing
 exports.validateCreate = validateCreate
 exports.validateId = validateId
+exports.validateUpdate = validateUpdate

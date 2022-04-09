@@ -46,10 +46,18 @@ router.post(
   upload.fields([{ name: 'refImage', maxCount: 10 }]),
   controller.add
 )
+
 router.get('/foodListing/:id', auth(), controller.readOne)
 
 router.get('/foodListing', auth(), controller.read)
 
 router.delete('/foodListing/deactivate', auth(), controller.deactivate)
+
+router.put(
+  '/foodListing/:id',
+  auth(),
+  upload.fields([{ name: 'photos', maxCount: 10 }]),
+  controller.update
+)
 
 module.exports = router
