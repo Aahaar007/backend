@@ -7,6 +7,7 @@ CONFIG.NODE_ENV = process.env.NODE_ENV
 CONFIG.DB_URL = process.env.DB_URL || 'localhost'
 CONFIG.DB_NAME = process.env.DB_NAME || 'aahaar'
 CONFIG.DB_USERNAME = process.env.DB_USERNAME
+CONFIG.DB_RS_NAME = process.env.DB_RS_NAME
 CONFIG.DB_PASSWORD = process.env.DB_PASSWORD
 CONFIG.BASE_URL = process.env.BASE_URL
 CONFIG.MAX_IMAGE_UPLOAD_SIZE_MB = process.env.MAX_IMAGE_UPLOAD_SIZE_MB

@@ -23,7 +23,7 @@ const firebaseServiceAccount = {
 const mongoURI =
   CONFIG.DB_USERNAME && CONFIG.DB_PASSWORD
     ? `mongodb+srv://${CONFIG.DB_USERNAME}:${CONFIG.DB_PASSWORD}@${CONFIG.DB_URL}/${CONFIG.DB_NAME}`
-    : `mongodb://localhost/${CONFIG.DB_NAME}`
+    : `mongodb://localhost/${CONFIG.DB_NAME}?replicaSet=${CONFIG.DB_RS_NAME}`
 
 mongoose
   .connect(mongoURI, {
