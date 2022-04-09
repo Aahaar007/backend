@@ -75,7 +75,7 @@ const read = async (req, res) => {
       .lean()
     await Promise.all(
       foodListings.map(async (foodListing) => {
-        console.log(foodListing.photos)
+        // console.log(foodListing.photos)
         foodListing.photos = await preSigner(foodListing.photos)
       })
     )

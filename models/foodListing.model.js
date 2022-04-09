@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const Joi = require('joi')
-const { boolean } = require('joi')
 Joi.objectId = require('joi-objectid')(Joi)
 
 const foodListingSchema = new mongoose.Schema(
