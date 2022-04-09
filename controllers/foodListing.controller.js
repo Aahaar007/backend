@@ -17,6 +17,9 @@ const add = async (req, res) => {
     let foodListing = new FoodListing({
       donorId: req.uid,
       ...req.body,
+      timeOfExpiry: new Date(
+        new Date().getTime() + req.body.timeOfExpiry * 60000
+      ),
       photos: req.files['refImage']
         ? req.files['refImage'].map((file) => file.key)
         : [],
@@ -55,7 +58,11 @@ const readOne = async (req, res) => {
 
 const read = async (req, res) => {
   const fields = ['isVeg', 'typeOfDonor', 'quantity', 'isActive']
-  const filter = {}
+  const filter = {
+    timeOfExpiry: {
+      $gte: new Date(),
+    },
+  }
   fields.forEach((fields) => {
     if (req.query[fields]) filter[fields] = req.query[fields]
   })
@@ -78,7 +85,7 @@ const read = async (req, res) => {
   }
 }
 
-const update = async (req, res) => {
+const updateOne = async (req, res) => {
   const id = req.params.id
   if (!id || !mongoose.isValidObjectId(id))
     return res.status(400).send({ error: 'Invalid id.' })
@@ -88,25 +95,26 @@ const update = async (req, res) => {
   if (error) return res.status(400).send({ error: error.message })
 
   const updateQuery = {}
-  const fields = [
-    'quantity',
-    'description',
-    'typeOfDonor',
-    'isVeg',
-    'address',
-    'timeOfExpiry',
-  ]
+  const fields = ['quantity', 'description', 'typeOfDonor', 'isVeg', 'address']
 
   fields.forEach((field) => {
-    if (req.body[field]) updateQuery[field] = req.body[field]
+    if (field != 'timeOfExpiry' && req.body[field])
+      updateQuery[field] = req.body[field]
   })
 
   if (req.files.photos) {
     updateQuery.photos = req.files.photos.map((photo) => photo.key)
+  } else {
+    updateQuery.photos = []
   }
 
   try {
     let foodListing = await FoodListing.findOne({ _id: id, donorId })
+    //timeOfExpiry field updated here
+    if (req.body['timeOfExpiry'])
+      updateQuery['timeOfExpiry'] =
+        foodListing.createdAt.getTime() + req.body['timeOfExpiry'] * 60000
+
     if (!foodListing)
       return res.status(404).send({ error: 'Food Listing not found.' })
     if (updateQuery.photos.length > 0) {
@@ -155,6 +163,6 @@ module.exports = {
   add,
   readOne,
   read,
-  update,
+  updateOne,
   deactivate,
 }
