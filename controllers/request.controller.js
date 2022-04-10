@@ -6,11 +6,11 @@ const add = async (req, res) => {
   const { error } = validateCreate(req.body)
   if (error) return res.status(400).send({ error: error.message })
 
-  const check = await Request.find({
+  const check = await Request.findOne({
     orderId: req.body.orderId,
     uid: req.uid,
     status: { $in: ['FULFILLED', 'ACTIVE'] },
-  })
+  }).lean()
 
   if (check)
     return res

@@ -7,7 +7,7 @@ module.exports = () => {
       const foodListing = await FoodListing.findById(req.params.id).lean()
       const currDate = new Date()
 
-      if (!foodListing) {
+      if (!foodListing || !foodListing.isActive) {
         return res.status(404).send({
           error: 'Food Listing not found.',
         })

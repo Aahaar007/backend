@@ -112,12 +112,14 @@ const updateOne = async (req, res) => {
   try {
     let foodListing = await FoodListing.findOne({ _id: id, donorId })
     //timeOfExpiry field updated here
+
+    if (!foodListing)
+      return res.status(404).send({ error: 'Food Listing not found.' })
+
     if (req.body['timeOfExpiry'])
       updateQuery['timeOfExpiry'] =
         foodListing.createdAt.getTime() + req.body['timeOfExpiry'] * 60000
 
-    if (!foodListing)
-      return res.status(404).send({ error: 'Food Listing not found.' })
     if (updateQuery.photos.length > 0) {
       deleteS3Object(foodListing.photos)
     }
