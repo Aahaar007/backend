@@ -126,14 +126,28 @@ const fulfill = async (req, res) => {
       })
     }
 
+    const foodListing = await FoodListing.findById(request.orderId)
+    if (!foodListing) {
+      session.endSession()
+      return res.status(404).send({
+        error: 'Food Listing not found.',
+      })
+    }
+
+    if (foodListing.donorId !== req.uid) {
+      session.endSession()
+      return res.status(401).send({
+        error: 'Access denied',
+        message: 'Only donor is allowed to fulfill requests.',
+      })
+    }
+
     if (request.status !== 'ACTIVE') {
       session.endSession()
       return res.status(404).send({
         error: `Food Request was ${request.status.toLocaleLowerCase()}`,
       })
     }
-
-    console.log(request)
 
     session.startTransaction()
     await Request.findOneAndUpdate(
