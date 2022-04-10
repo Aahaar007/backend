@@ -50,19 +50,19 @@ router.post(
 
 router.get(
   '/foodListing/:id',
-  updateFoodListingStatus(),
   auth(),
+  updateFoodListingStatus(),
   controller.readOne
 )
 
 router.get('/foodListing', auth(), controller.read)
 
-router.delete('/foodListing/deactivate', auth(), controller.deactivate)
+router.delete('/foodListing/deactivate/:id', auth(), controller.deactivate)
 
 router.put(
   '/foodListing/:id',
-  updateFoodListingStatus(),
   auth(),
+  updateFoodListingStatus(),
   upload.fields([{ name: 'photos', maxCount: 10 }]),
   controller.updateOne
 )

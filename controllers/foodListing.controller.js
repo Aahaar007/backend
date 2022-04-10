@@ -9,6 +9,7 @@ const {
 
 const preSigner = require('../utility/urlGenerator')
 const deleteS3Object = require('../utility/deleteS3Object')
+const expireListing = require('../utility/expireListing')
 
 const add = async (req, res) => {
   const { error } = validateCreate(req.body)
@@ -39,7 +40,7 @@ const add = async (req, res) => {
 const readOne = async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return res.status(500).send({
-      error: 'Invalid id.',
+      error: 'Invalid ID.',
     })
   }
   try {
@@ -88,7 +89,7 @@ const read = async (req, res) => {
 const updateOne = async (req, res) => {
   const id = req.params.id
   if (!id || !mongoose.isValidObjectId(id))
-    return res.status(400).send({ error: 'Invalid id.' })
+    return res.status(400).send({ error: 'Invalid ID.' })
   const donorId = req.uid
 
   const { error } = validateUpdate(req.body)
@@ -98,7 +99,7 @@ const updateOne = async (req, res) => {
   const fields = ['quantity', 'description', 'typeOfDonor', 'isVeg', 'address']
 
   fields.forEach((field) => {
-    if (field != 'timeOfExpiry' && req.body[field])
+    if (field !== 'timeOfExpiry' && req.body[field])
       updateQuery[field] = req.body[field]
   })
 
@@ -135,27 +136,25 @@ const updateOne = async (req, res) => {
 }
 
 const deactivate = async (req, res) => {
-  const { error } = validateId(req.body)
+  const { error } = validateId(req.params)
   if (error) return res.status(400).send({ error: error.message })
   try {
-    const donorId = req.uid
-    const listingID = req.body.id
-    const updatedFoodListing = await FoodListing.findOneAndUpdate(
-      { _id: listingID, donorId },
-      { isActive: false },
-      { new: true }
-    )
+    const listingID = req.params.id
+    const updatedFoodListing = await FoodListing.findById(listingID)
+
     if (!updatedFoodListing) {
       return res.status(404).send({
         error: 'Food listing not found',
       })
     }
+
+    await expireListing(listingID)
     return res.status(200).send({
       message: 'Food listing successfully Deactivated.',
       updatedFoodListing,
     })
   } catch (e) {
-    return res.status(500).send({ error: e.message })
+    return res.status(500).send({ error: e })
   }
 }
 
