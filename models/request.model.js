@@ -1,3 +1,4 @@
+const Joi = require('joi')
 const mongoose = require('mongoose')
 
 const requestSchema = new mongoose.Schema(
@@ -10,7 +11,7 @@ const requestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['ACTIVE', 'COMPLETED', 'CANCELED'],
+      enum: ['ACTIVE', 'FULFILLED', 'CANCELLED', 'EXPIRED'],
     },
   },
   { timestamps: true }
@@ -18,4 +19,13 @@ const requestSchema = new mongoose.Schema(
 
 const Request = mongoose.model('Request', requestSchema)
 
+const validateCreate = (data) => {
+  const schema = Joi.object({
+    orderId: Joi.objectId().required(),
+    amount: Joi.number().min(1).required(),
+  })
+  return schema.validate(data)
+}
+
 exports.Request = Request
+exports.validateCreate = validateCreate

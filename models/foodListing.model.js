@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const Joi = require('joi')
-const { boolean } = require('joi')
 Joi.objectId = require('joi-objectid')(Joi)
 
 const foodListingSchema = new mongoose.Schema(
@@ -35,7 +34,7 @@ const foodListingSchema = new mongoose.Schema(
       required: false,
     },
     timeOfExpiry: {
-      type: String,
+      type: Date,
       required: true,
     },
     requestQueue: {
@@ -59,7 +58,7 @@ const validateCreate = (data) => {
     typeOfDonor: Joi.string().valid('NGO', 'Individual').required(),
     isVeg: Joi.boolean().required(),
     address: Joi.string(),
-    timeOfExpiry: Joi.string().required(),
+    timeOfExpiry: Joi.number().required(),
   })
   return schema.validate(data)
 }
@@ -78,7 +77,7 @@ const validateUpdate = (data) => {
     typeOfDonor: Joi.string().valid('NGO', 'Individual'),
     isVeg: Joi.boolean(),
     address: Joi.string(),
-    timeOfExpiry: Joi.string(),
+    timeOfExpiry: Joi.number(),
   })
   return schema.validate(data)
 }

@@ -1,6 +1,7 @@
 const router = require('express').Router()
 
 const auth = require('../middlewares/auth.middleware')
+const updateFoodListingStatus = require('../middlewares/foodListingStatus.middleware')
 const controller = require('../controllers/foodListing.controller')
 const CONFIG = require('../config/config')
 const multer = require('multer')
@@ -47,17 +48,23 @@ router.post(
   controller.add
 )
 
-router.get('/foodListing/:id', auth(), controller.readOne)
+router.get(
+  '/foodListing/:id',
+  auth(),
+  updateFoodListingStatus(),
+  controller.readOne
+)
 
 router.get('/foodListing', auth(), controller.read)
 
-router.delete('/foodListing/deactivate', auth(), controller.deactivate)
+router.delete('/foodListing/deactivate/:id', auth(), controller.deactivate)
 
 router.put(
   '/foodListing/:id',
   auth(),
+  updateFoodListingStatus(),
   upload.fields([{ name: 'photos', maxCount: 10 }]),
-  controller.update
+  controller.updateOne
 )
 
 module.exports = router

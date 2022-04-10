@@ -9,6 +9,7 @@ const {
 
 const preSigner = require('../utility/urlGenerator')
 const deleteS3Object = require('../utility/deleteS3Object')
+const expireListing = require('../utility/expireListing')
 
 const add = async (req, res) => {
   const { error } = validateCreate(req.body)
@@ -17,6 +18,9 @@ const add = async (req, res) => {
     let foodListing = new FoodListing({
       donorId: req.uid,
       ...req.body,
+      timeOfExpiry: new Date(
+        new Date().getTime() + req.body.timeOfExpiry * 60000
+      ),
       photos: req.files['refImage']
         ? req.files['refImage'].map((file) => file.key)
         : [],
@@ -36,7 +40,7 @@ const add = async (req, res) => {
 const readOne = async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return res.status(500).send({
-      error: 'Invalid id.',
+      error: 'Invalid ID.',
     })
   }
   try {
@@ -55,7 +59,11 @@ const readOne = async (req, res) => {
 
 const read = async (req, res) => {
   const fields = ['isVeg', 'typeOfDonor', 'quantity', 'isActive']
-  const filter = {}
+  const filter = {
+    timeOfExpiry: {
+      $gte: new Date(),
+    },
+  }
   fields.forEach((fields) => {
     if (req.query[fields]) filter[fields] = req.query[fields]
   })
@@ -68,7 +76,7 @@ const read = async (req, res) => {
       .lean()
     await Promise.all(
       foodListings.map(async (foodListing) => {
-        console.log(foodListing.photos)
+        // console.log(foodListing.photos)
         foodListing.photos = await preSigner(foodListing.photos)
       })
     )
@@ -78,37 +86,40 @@ const read = async (req, res) => {
   }
 }
 
-const update = async (req, res) => {
+const updateOne = async (req, res) => {
   const id = req.params.id
   if (!id || !mongoose.isValidObjectId(id))
-    return res.status(400).send({ error: 'Invalid id.' })
+    return res.status(400).send({ error: 'Invalid ID.' })
   const donorId = req.uid
 
   const { error } = validateUpdate(req.body)
   if (error) return res.status(400).send({ error: error.message })
 
   const updateQuery = {}
-  const fields = [
-    'quantity',
-    'description',
-    'typeOfDonor',
-    'isVeg',
-    'address',
-    'timeOfExpiry',
-  ]
+  const fields = ['quantity', 'description', 'typeOfDonor', 'isVeg', 'address']
 
   fields.forEach((field) => {
-    if (req.body[field]) updateQuery[field] = req.body[field]
+    if (field !== 'timeOfExpiry' && req.body[field])
+      updateQuery[field] = req.body[field]
   })
 
   if (req.files.photos) {
     updateQuery.photos = req.files.photos.map((photo) => photo.key)
+  } else {
+    updateQuery.photos = []
   }
 
   try {
     let foodListing = await FoodListing.findOne({ _id: id, donorId })
+    //timeOfExpiry field updated here
+
     if (!foodListing)
       return res.status(404).send({ error: 'Food Listing not found.' })
+
+    if (req.body['timeOfExpiry'])
+      updateQuery['timeOfExpiry'] =
+        foodListing.createdAt.getTime() + req.body['timeOfExpiry'] * 60000
+
     if (updateQuery.photos.length > 0) {
       deleteS3Object(foodListing.photos)
     }
@@ -127,27 +138,25 @@ const update = async (req, res) => {
 }
 
 const deactivate = async (req, res) => {
-  const { error } = validateId(req.body)
+  const { error } = validateId(req.params)
   if (error) return res.status(400).send({ error: error.message })
   try {
-    const donorId = req.uid
-    const listingID = req.body.id
-    const updatedFoodListing = await FoodListing.findOneAndUpdate(
-      { _id: listingID, donorId },
-      { isActive: false },
-      { new: true }
-    )
+    const listingID = req.params.id
+    const updatedFoodListing = await FoodListing.findById(listingID)
+
     if (!updatedFoodListing) {
       return res.status(404).send({
         error: 'Food listing not found',
       })
     }
+
+    await expireListing(listingID)
     return res.status(200).send({
       message: 'Food listing successfully Deactivated.',
       updatedFoodListing,
     })
   } catch (e) {
-    return res.status(500).send({ error: e.message })
+    return res.status(500).send({ error: e })
   }
 }
 
@@ -155,6 +164,6 @@ module.exports = {
   add,
   readOne,
   read,
-  update,
+  updateOne,
   deactivate,
 }
