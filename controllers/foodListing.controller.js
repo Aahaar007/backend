@@ -21,9 +21,10 @@ const add = async (req, res) => {
       timeOfExpiry: new Date(
         new Date().getTime() + req.body.timeOfExpiry * 60000
       ),
-      photos: req.files['refImage']
-        ? req.files['refImage'].map((file) => file.key)
-        : [],
+      photos:
+        req.files && req.files['refImage']
+          ? req.files['refImage'].map((file) => file.key)
+          : [],
     })
     await foodListing.save()
     foodListing = foodListing.toObject()
@@ -33,6 +34,7 @@ const add = async (req, res) => {
       foodListing,
     })
   } catch (e) {
+    console.log(e)
     return res.status(500).send({ error: e.message })
   }
 }
