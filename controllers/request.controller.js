@@ -2,21 +2,27 @@ const mongoose = require('mongoose')
 const enums = require('../constants/enums')
 const { FoodListing } = require('../models/foodListing.model')
 const { Request, validateCreate } = require('../models/request.model')
+const expireListing = require('../utility/expireListing')
 
 const add = async (req, res) => {
   const { error } = validateCreate(req.body)
   if (error) return res.status(400).send({ error: error.message })
 
-  const check = await Request.findOne({
-    orderId: req.body.orderId,
-    uid: req.uid,
-    status: { $in: [enums.request.FULFILLED, enums.request.ACTIVE] },
-  }).lean()
+  try {
+    const check = await Request.findOne({
+      orderId: req.body.orderId,
+      uid: req.uid,
+      status: { $in: [enums.request.FULFILLED, enums.request.ACTIVE] },
+    }).lean()
 
-  if (check)
-    return res
-      .status(403)
-      .send({ error: 'Multiple requests on a listing are not allowed.' })
+    if (check)
+      return res
+        .status(403)
+        .send({ error: 'Multiple requests on a listing are not allowed.' })
+  } catch (e) {
+    console.log(e)
+    return res.status(500).send({ error: e.message })
+  }
 
   const session = await mongoose.connection.startSession()
   try {
@@ -28,6 +34,25 @@ const add = async (req, res) => {
 
     session.startTransaction()
     await request.save({ session })
+
+    const foodListing = await FoodListing.findOne({
+      _id: req.body.orderId,
+    }).lean()
+
+    if (!foodListing) {
+      session.endSession()
+      return res.status(404).send({ error: 'Food Listing not found.' })
+    } else if (foodListing.donorId === req.uid) {
+      session.endSession()
+      return res
+        .status(400)
+        .send({ error: 'Donors cannot request food from their own listings.' })
+    } else if (foodListing['timeOfExpiry'].getTime() < new Date().getTime()) {
+      if (foodListing.isActive) await expireListing(foodListing._id)
+      session.endSession()
+      return res.status(400).send({ error: 'The food listing has expired.' })
+    }
+
     await FoodListing.updateOne(
       { _id: req.body.orderId },
       { $addToSet: { requestQueue: request._id } }
@@ -41,6 +66,7 @@ const add = async (req, res) => {
     })
   } catch (e) {
     await session.abortTransaction()
+    console.log(e)
     res.status(500).send({ error: e.message })
   }
 
