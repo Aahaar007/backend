@@ -21,7 +21,7 @@ const foodListingSchema = new mongoose.Schema(
     },
     typeOfDonor: {
       type: String,
-      enum: [enums.foodListing.NGO, enums.foodListing.NGO],
+      enum: [enums.foodListing.NGO, enums.foodListing.Individual],
       required: true,
     },
     isVeg: {
