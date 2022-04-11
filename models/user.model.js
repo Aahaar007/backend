@@ -1,8 +1,9 @@
 const mongoose = require('mongoose')
 const Joi = require('joi').extend(require('@joi/date'))
 const _ = require('lodash')
-
-const characterEnums = ['M', 'T', 'F']
+const enums = require('../constants/enums')
+const schemas = require('../constants/schemas')
+const regex = require('../constants/regex')
 
 const phoneSchmea = new mongoose.Schema(
   {
@@ -50,7 +51,7 @@ const userSchema = new mongoose.Schema(
         {
           id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'FoodOrder',
+            ref: schemas.FoodListing,
             required: true,
           },
         },
@@ -59,7 +60,7 @@ const userSchema = new mongoose.Schema(
         {
           id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'FoodOrder',
+            ref: schemas.FoodListing,
             required: true,
           },
         },
@@ -68,7 +69,7 @@ const userSchema = new mongoose.Schema(
         {
           id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'FoodOrder',
+            ref: schemas.FoodListing,
             required: true,
           },
         },
@@ -87,7 +88,7 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: characterEnums,
+      enum: [enums.user.Male, enums.user.Trans, enums.user.Female],
     },
     profileURL: {
       type: String,
@@ -96,7 +97,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-const User = mongoose.model('User', userSchema)
+const User = mongoose.model(schemas.User, userSchema)
 
 const validateCreateUser = (data) => {
   const schema = Joi.object({
@@ -104,8 +105,8 @@ const validateCreateUser = (data) => {
       .email({ tlds: { allow: ['com', 'in', 'net'] } })
       .required(),
     phone: Joi.object({
-      region: Joi.string().regex(/^\+\d{1,3}$/),
-      number: Joi.string().regex(/^\d{6,12}$/),
+      region: Joi.string().regex(regex.region),
+      number: Joi.string().regex(regex.number),
     }).required(),
   })
   return schema.validate(data)
@@ -141,9 +142,11 @@ const validateUpdateUser = (data) => {
         'date.format': `dob should be in the format ${dateFormat}`,
         'date.max': `dob cannot be greater than today.`,
       }),
-    gender: Joi.string().valid('M', 'T', 'F').messages({
-      'string.invalid': `Only valid values for the gender field are 'M', 'F', and 'T'`,
-    }),
+    gender: Joi.string()
+      .valid(enums.user.Male, enums.user.Trans, enums.user.Female)
+      .messages({
+        'string.invalid': `Only valid values for the gender field are '${enums.user.Male}', '${enums.user.Female}', and '${enums.user.Trans}'`,
+      }),
     profileURL: Joi.string(),
   }).messages({
     'object.unknown': 'Invalid fields passed.',
@@ -154,8 +157,8 @@ const validateUpdateUser = (data) => {
 const validateExisting = (data) => {
   const schema = Joi.object({
     phone: Joi.object({
-      region: Joi.string().regex(/^\+\d{1,3}$/),
-      number: Joi.string().regex(/^\d{6,12}$/),
+      region: Joi.string().regex(regex.region),
+      number: Joi.string().regex(regex.number),
     }).required(),
   })
   return schema.validate(data)

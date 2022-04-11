@@ -1,6 +1,7 @@
 const { FoodListing } = require('../models/foodListing.model')
 const { Request } = require('../models/request.model')
 const mongoose = require('mongoose')
+const enums = require('../constants/enums')
 
 module.exports = async (id) => {
   const session = await mongoose.connection.startSession()
@@ -12,8 +13,8 @@ module.exports = async (id) => {
       { session }
     )
     await Request.updateMany(
-      { orderId: id, status: 'ACTIVE' },
-      { $set: { status: 'EXPIRED' } },
+      { orderId: id, status: enums.request.ACTIVE },
+      { $set: { status: enums.request.EXPIRED } },
       { session }
     )
     await session.commitTransaction()

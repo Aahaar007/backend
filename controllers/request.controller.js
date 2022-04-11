@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const enums = require('../constants/enums')
 const { FoodListing } = require('../models/foodListing.model')
 const { Request, validateCreate } = require('../models/request.model')
 
@@ -9,7 +10,7 @@ const add = async (req, res) => {
   const check = await Request.findOne({
     orderId: req.body.orderId,
     uid: req.uid,
-    status: { $in: ['FULFILLED', 'ACTIVE'] },
+    status: { $in: [enums.request.FULFILLED, enums.request.ACTIVE] },
   }).lean()
 
   if (check)
@@ -21,7 +22,7 @@ const add = async (req, res) => {
   try {
     let request = new Request({
       uid: req.uid,
-      status: 'ACTIVE',
+      status: enums.request.ACTIVE,
       ...req.body,
     })
 
@@ -61,7 +62,7 @@ const cancel = async (req, res) => {
       })
     }
 
-    if (request.status !== 'ACTIVE') {
+    if (request.status !== enums.request.ACTIVE) {
       session.endSession()
       return res.status(404).send({
         error: `Food Request was ${request.status.toLocaleLowerCase()}`,
@@ -71,7 +72,7 @@ const cancel = async (req, res) => {
     session.startTransaction()
     await Request.findOneAndUpdate(
       { _id: id },
-      { status: 'CANCELLED' },
+      { status: enums.request.CANCELLED },
       { session }
     )
     await FoodListing.updateOne(
@@ -142,7 +143,7 @@ const fulfill = async (req, res) => {
       })
     }
 
-    if (request.status !== 'ACTIVE') {
+    if (request.status !== enums.request.ACTIVE) {
       session.endSession()
       return res.status(404).send({
         error: `Food Request was ${request.status.toLocaleLowerCase()}`,
@@ -152,7 +153,7 @@ const fulfill = async (req, res) => {
     session.startTransaction()
     await Request.findOneAndUpdate(
       { _id: id },
-      { status: 'FULFILLED' },
+      { status: enums.request.FULFILLED },
       { session }
     )
     await FoodListing.updateOne(

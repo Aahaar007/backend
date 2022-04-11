@@ -1,5 +1,7 @@
 const Joi = require('joi')
 const mongoose = require('mongoose')
+const enums = require('../constants/enums')
+const schemas = require('../constants/schemas')
 
 const requestSchema = new mongoose.Schema(
   {
@@ -11,13 +13,18 @@ const requestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['ACTIVE', 'FULFILLED', 'CANCELLED', 'EXPIRED'],
+      enum: [
+        enums.request.ACTIVE,
+        enums.request.FULFILLED,
+        enums.request.CANCELLED,
+        enums.request.EXPIRED,
+      ],
     },
   },
   { timestamps: true }
 )
 
-const Request = mongoose.model('Request', requestSchema)
+const Request = mongoose.model(schemas.Request, requestSchema)
 
 const validateCreate = (data) => {
   const schema = Joi.object({

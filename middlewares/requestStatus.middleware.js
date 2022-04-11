@@ -1,3 +1,4 @@
+const enums = require('../constants/enums')
 const { FoodListing } = require('../models/foodListing.model')
 const { Request } = require('../models/request.model')
 const expireListing = require('../utility/expireListing')
@@ -20,7 +21,7 @@ module.exports = () => {
 
       const currDate = new Date()
       if (
-        request.status === 'EXPIRED' ||
+        request.status === enums.request.EXPIRED ||
         foodListing['timeOfExpiry'].getTime() < currDate.getTime()
       ) {
         await expireListing(request.orderId)
