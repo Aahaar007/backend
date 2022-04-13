@@ -1,10 +1,12 @@
-const e = require('express')
 const {
   validateCreateUser,
   User,
   validateUpdateUser,
   validateExisting,
 } = require('../models/user.model')
+
+const deleteS3Object = require('../utility/deleteS3Object')
+const preSigner = require('../utility/urlGenerator')
 
 const add = async (req, res) => {
   const uid = req.uid
@@ -31,11 +33,11 @@ const add = async (req, res) => {
   }
 }
 
-const update = async (req, res) => {
+const updateOne = async (req, res) => {
   const { uid } = req
   const { error } = validateUpdateUser(req.body)
   if (error) return res.status(400).send({ error: error.message })
-  const fields = ['name', 'address', 'dob', 'gender', 'profileURL']
+  const fields = ['name', 'address', 'dob', 'gender']
   const returnFields = [
     '_id',
     'name',
@@ -52,7 +54,14 @@ const update = async (req, res) => {
     fields.forEach((field) => {
       if (req.body[field]) updateQuery[field] = req.body[field]
     })
-    const user = await User.findOneAndUpdate(
+    if (req.file) updateQuery.profileURL = req.file.key
+
+    let user = await User.findOne({ _id: uid }).lean()
+    if (updateQuery.profileURL && user.profileURL !== '') {
+      deleteS3Object([user.profileURL])
+      console.log('called')
+    }
+    user = await User.findOneAndUpdate(
       { _id: uid },
       {
         $set: updateQuery,
@@ -63,6 +72,8 @@ const update = async (req, res) => {
     )
       .select(returnFields)
       .lean()
+    const profileURL = await preSigner(user.profileURL ? [user.profileURL] : [])
+    user.profileURL = profileURL.length > 0 ? profileURL[0] : ''
     return res.status(200).send({
       message: 'user information successfully updated.',
       user,
@@ -90,6 +101,8 @@ const readOne = async (req, res) => {
     const user = await User.findById(uid).select(returnFields).lean()
     if (!user)
       return res.status(404).send({ error: 'invalid uid/user not found.' })
+    const profileURL = await preSigner(user.profileURL ? [user.profileURL] : [])
+    user.profileURL = profileURL.length > 0 ? profileURL[0] : ''
     return res.status(200).send({ user })
   } catch (e) {
     return res.status(500).send({ error: e.message })
@@ -121,7 +134,7 @@ const checkExisting = async (req, res) => {
 
 module.exports = {
   add,
-  update,
+  updateOne,
   readOne,
   hasProfile,
   checkExisting,
