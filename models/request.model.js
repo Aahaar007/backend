@@ -34,7 +34,6 @@ const validateCreate = (data) => {
   const schema = Joi.object({
     orderId: Joi.objectId().required(),
     amount: Joi.number().min(1).required(),
-    code: Joi.string().length(12).required(),
   })
   return schema.validate(data)
 }
