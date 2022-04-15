@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { nanoid } = require('nanoid')
 const enums = require('../constants/enums')
 const { FoodListing } = require('../models/foodListing.model')
 const { Request, validateCreate } = require('../models/request.model')
@@ -29,6 +30,7 @@ const add = async (req, res) => {
     let request = new Request({
       uid: req.uid,
       status: enums.request.ACTIVE,
+      code: nanoid(12),
       ...req.body,
     })
 
