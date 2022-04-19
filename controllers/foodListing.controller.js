@@ -12,7 +12,7 @@ const deleteS3Object = require('../utility/deleteS3Object')
 const expireListing = require('../utility/expireListing')
 
 const add = async (req, res) => {
-  const { error } = validateCreate(req.body)
+  const { error } = req.body
   if (error) return res.status(400).send({ error: error.message })
   try {
     let foodListing = new FoodListing({
@@ -46,7 +46,9 @@ const readOne = async (req, res) => {
     })
   }
   try {
-    const foodListing = await FoodListing.findById(req.params.id).lean()
+    const foodListing = await FoodListing.findById(req.params.id)
+      .populate('requestQueue', 'amount')
+      .lean()
     if (!foodListing || !foodListing.isActive) {
       return res.status(404).send({
         error: 'Food Listing not found.',
@@ -75,6 +77,7 @@ const read = async (req, res) => {
       .sort({
         createdAt: -1,
       })
+      .populate('requestQueue', 'amount')
       .lean()
     await Promise.all(
       foodListings.map(async (foodListing) => {
