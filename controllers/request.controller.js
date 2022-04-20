@@ -205,7 +205,9 @@ const fulfill = async (req, res) => {
     if (request.status !== enums.request.ACTIVE) {
       session.endSession()
       return res.status(404).send({
-        error: `Food Request was ${request.status.toLocaleLowerCase()}`,
+        error: `Food Request has already ${
+          request.status.toLocaleLowerCase() === 'expired' ? '' : 'been'
+        } ${request.status.toLocaleLowerCase()}`,
       })
     }
 
