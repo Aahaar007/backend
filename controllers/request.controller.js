@@ -140,6 +140,37 @@ const readOne = async (req, res) => {
   }
 }
 
+const readOneByCode = async (req, res) => {
+  try {
+    const request = await Request.findOne({ code: req.params.code }).lean()
+    if (!request)
+      return res.status(404).send({
+        error: 'Food Request not found.',
+      })
+
+    const foodListing = await FoodListing.findById(request.orderId)
+    if (!foodListing || !foodListing.isActive) {
+      if (foodListing) {
+        const currDate = new Date()
+        if (
+          request.status === enums.request.EXPIRED ||
+          foodListing['timeOfExpiry'].getTime() < currDate.getTime()
+        ) {
+          await expireListing(request.orderId)
+          return res.status(400).send({ error: 'The request has expired.' })
+        }
+      }
+      return res.status(404).send({
+        error: 'Food Listing not found.',
+      })
+    }
+
+    return res.status(200).send({ request })
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
 const fulfill = async (req, res) => {
   const id = req.params.id
   if (!id || !mongoose.isValidObjectId(id))
@@ -210,4 +241,4 @@ const fulfill = async (req, res) => {
   session.endSession()
 }
 
-module.exports = { add, cancel, fulfill, readOne }
+module.exports = { add, cancel, fulfill, readOne, readOneByCode }
