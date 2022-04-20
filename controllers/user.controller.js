@@ -8,6 +8,11 @@ const {
 const deleteS3Object = require('../utility/deleteS3Object')
 const preSigner = require('../utility/urlGenerator')
 
+const { FoodListing } = require('../models/foodListing.model')
+const { Request } = require('../models/request.model')
+
+const enums = require('../constants/enums')
+
 const add = async (req, res) => {
   const uid = req.uid
   const { error } = validateCreateUser(req.body)
@@ -132,10 +137,96 @@ const checkExisting = async (req, res) => {
   }
 }
 
+const readAllFoodListings = async (req, res) => {
+  const { uid } = req
+  try {
+    const foodListings = await FoodListing.find({ donorId: uid })
+      .sort({
+        isActive: -1,
+        timeOfExpiry: -1,
+        quantity: -1,
+      })
+      .lean()
+    await Promise.all(
+      foodListings.map(async (foodListing) => {
+        foodListing.photos = await preSigner(foodListing.photos)
+      })
+    )
+    return res.status(200).send({ foodListings })
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
+const readAllRequests = async (req, res) => {
+  const { uid } = req
+  try {
+    const pipeline = [
+      {
+        $match: {
+          uid,
+        },
+      },
+      {
+        $addFields: {
+          sortField: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $eq: ['$status', enums.request.ACTIVE],
+                  },
+                  then: 0,
+                },
+                {
+                  case: {
+                    $eq: ['$status', enums.request.FULFILLED],
+                  },
+                  then: 1,
+                },
+                {
+                  case: {
+                    $eq: ['$status', enums.request.CANCELLED],
+                  },
+                  then: 2,
+                },
+                {
+                  case: {
+                    $eq: ['$status', enums.request.EXPIRED],
+                  },
+                  then: 3,
+                },
+              ],
+              default: 4,
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          sortField: 1,
+        },
+      },
+      {
+        $project: {
+          sortField: 0,
+        },
+      },
+    ]
+    const requests = await Request.aggregate(pipeline)
+    return res.status(200).send(requests)
+  } catch (e) {
+    console.log(e)
+    return res.status(500).send({ error: e.message })
+  }
+}
+
 module.exports = {
   add,
   updateOne,
   readOne,
   hasProfile,
   checkExisting,
+  readAllFoodListings,
+  readAllRequests,
 }

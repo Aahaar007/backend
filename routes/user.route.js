@@ -47,6 +47,10 @@ router.post('/user/checkExisting', controller.checkExisting)
 
 router.get('/user/hasProfile', auth(), controller.hasProfile)
 
+router.get('/user/foodListings', auth(), controller.readAllFoodListings)
+
+router.get('/user/requests', auth(), controller.readAllRequests)
+
 router.get('/user/:uid?', controller.readOne)
 
 module.exports = router
