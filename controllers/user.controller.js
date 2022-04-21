@@ -212,9 +212,53 @@ const readAllRequests = async (req, res) => {
           sortField: 0,
         },
       },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'uid',
+          foreignField: '_id',
+          as: 'userDetails',
+        },
+      },
+      {
+        $lookup: {
+          from: 'foodlistings',
+          localField: 'orderId',
+          foreignField: '_id',
+          as: 'foodListingDetails',
+        },
+      },
+      {
+        $unwind: {
+          path: '$userDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: '$foodListingDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          donorName: {
+            $ifNull: ['$userDetails.name', 'NA'],
+          },
+          description: {
+            $ifNull: ['$foodListingDetails.description', 'NA'],
+          },
+        },
+      },
+      {
+        $project: {
+          userDetails: 0,
+          foodListingDetails: 0,
+        },
+      },
     ]
     const requests = await Request.aggregate(pipeline)
-    return res.status(200).send(requests)
+    return res.status(200).send({ requests })
   } catch (e) {
     console.log(e)
     return res.status(500).send({ error: e.message })
