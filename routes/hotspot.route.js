@@ -41,4 +41,6 @@ const upload = multer({
 
 router.post('/hotspot', auth(), upload.single('imgSrc'), controller.add)
 
+router.get('/hotspot', auth(), controller.read)
+
 module.exports = router

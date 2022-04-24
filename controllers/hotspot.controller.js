@@ -24,6 +24,22 @@ const add = async (req, res) => {
   }
 }
 
+const read = async (req, res) => {
+  try {
+    const hotspots = await Hotspot.find().lean()
+    await Promise.all(
+      hotspots.map(async (hotspot) => {
+        const imgSrc = await preSigner(hotspot.imgSrc ? [hotspot.imgSrc] : [])
+        hotspot.imgSrc = imgSrc.length > 0 ? imgSrc[0] : ''
+      })
+    )
+    return res.status(200).send({ hotspots })
+  } catch (e) {
+    return res.status(500).send({ error: e.message })
+  }
+}
+
 module.exports = {
   add,
+  read,
 }
