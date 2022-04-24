@@ -167,3 +167,4 @@ exports.User = User
 exports.validateCreateUser = validateCreateUser
 exports.validateUpdateUser = validateUpdateUser
 exports.validateExisting = validateExisting
+exports.phoneSchmea = phoneSchmea
