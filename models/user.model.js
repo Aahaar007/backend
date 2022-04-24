@@ -116,7 +116,7 @@ const validateCreateUser = (data) => {
 const validateUpdateUser = (data) => {
   const name = { min: 1, max: 50 }
   const address = { min: 3, max: 128 }
-  const dateFormat = 'DD/MM/YYYY'
+  const dateFormat = 'MM/DD/YYYY'
   const schema = Joi.object({
     name: Joi.string()
       .min(name.min)
